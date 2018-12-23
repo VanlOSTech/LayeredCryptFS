@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CWD=`pwd`
+
+mkdir -p ${CWD}/upper ${CWD}/lower ${CWD}/merged ${CWD}/work
+
+mkdir -p ${CWD}/upper_cryptfs/cipher ${CWD}/lower_cryptfs/cipher
+if [ ! -f ${CWD}/upper_cryptfs/cipher/gocryptfs.conf ]; then
+	cd ${CWD}/upper_cryptfs
+	gocryptfs -init cipher
+	gocryptfs cipher ${CWD}/upper
+fi
+cd ${CWD}
+mkdir -p ${CWD}/lower_cryptfs/cipher
+if [ ! -f ${CWD}/lower_cryptfs/cipher/gocryptfs.conf ]; then
+	cd ${CWD}/lower_cryptfs
+	gocryptfs -init cipher
+	gocryptfs cipher ${CWD}/lower
+fi
+cd ${CWD}
+
+fuse-overlayfs -o lowerdir=lower,upperdir=upper,workdir=work merged
